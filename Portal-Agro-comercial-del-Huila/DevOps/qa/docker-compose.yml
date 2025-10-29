@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 🗄️ Base de datos PostgreSQL - QA
+  portal-agro-postgres-qa:
+    image: postgres:16
+    container_name: portal-agro-postgres-qa
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: portal-agro_qa
+    ports:
+      - "5433:5432"      # mapeamos distinto al host
+    volumes:
+      - pgdata_qa:/var/lib/postgresql/data
+    networks:
+      - network_qa
+
+  # 🌐 API principal - QA
+  portal-agro-api-qa:
+    container_name: portal-agro-api-qa
+    build:
+      context: ../..
+      dockerfile: Web/Dockerfile
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - portal-agro-postgres-qa
+    ports:
+      - "5101:8080"
+    networks:
+      - network_qa
+    labels:
+      - com.portal-agro.environment=qa
+
+volumes:
+  pgdata_qa:
+
+networks:
+  network_qa:
+    driver: bridge
