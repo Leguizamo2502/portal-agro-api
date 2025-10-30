@@ -16,6 +16,7 @@ pipeline {
         stage('Checkout código fuente') {
             steps {
                 echo "📥 Clonando repositorio desde GitHub..."
+                deleteDir()
                 checkout scm
                 sh 'ls -R Portal-Agro-comercial-del-Huila/DevOps || true'
             }
@@ -98,8 +99,9 @@ pipeline {
             steps {
                 sh """
                     echo "🚀 Desplegando entorno: ${env.ENVIRONMENT}"
-                    export COMPOSE_DOCKER_CLI_BUILD=0
-                    export DOCKER_BUILDKIT=0
+                    # Habilitar BuildKit para builds más rápidos y evitar warnings
+                    export DOCKER_BUILDKIT=1
+                    export COMPOSE_DOCKER_CLI_BUILD=1
                     docker compose -f ${env.COMPOSE_FILE} --env-file ${env.ENV_FILE} up -d --build
                 """
             }
