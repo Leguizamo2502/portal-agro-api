@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     ports:
-      - "5101:8080"
+      - "5100:8080"
     networks:
       - portal-agro_network
     labels:

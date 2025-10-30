@@ -1,43 +1,20 @@
 services:
-  portal-agro-postgres-staging:
-    image: postgres:16
-    container_name: portal-agro-postgres-staging
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: portal-agro_staging
-    ports:
-      - "5434:5432"
-    volumes:
-      - pgdata_staging:/var/lib/postgresql/data
-    networks:
-      - network_staging
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-
   portal-agro-api-staging:
-    image: portal-agro-api-staging:latest
     container_name: portal-agro-api-staging
+    build:
+      context: ../../../                # ← raíz del repo
+      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
+    image: portal-agro-api-staging:latest
     restart: always
     env_file:
       - .env
-    depends_on:
-      portal-agro-postgres-staging:
-        condition: service_healthy
     ports:
       - "5102:8080"
     networks:
-      - network_staging
+      - portal-agro_network
     labels:
-      - com.portal-agro.environment=staging
-
-volumes:
-  pgdata_staging:
+      - com.portalagro.environment=staging
 
 networks:
-  network_staging:
-    driver: bridge
+  portal-agro_network:
+    external: true
