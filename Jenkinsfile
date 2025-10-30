@@ -9,12 +9,13 @@ pipeline {
     }
 
     stages {
+
         // =======================================================
         // 1️⃣ CHECKOUT
         // =======================================================
         stage('Checkout código fuente') {
             steps {
-                echo '📥 Clonando repositorio desde GitHub...'
+                echo "📥 Clonando repositorio desde GitHub..."
                 checkout scm
                 sh 'ls -R Portal-Agro-comercial-del-Huila/DevOps || true'
             }
@@ -36,9 +37,7 @@ pipeline {
                     env.ENV_DIR = "Portal-Agro-comercial-del-Huila/DevOps/${env.ENVIRONMENT}"
                     env.COMPOSE_FILE = "${env.ENV_DIR}/docker-compose.yml"
                     env.ENV_FILE = "${env.ENV_DIR}/.env"
-
-                    // 📂 Ruta de docker-compose de bases de datos compartidas
-                    env.DB_COMPOSE_FILE = 'portal-agro-db/docker-compose.yml'
+                    env.DB_COMPOSE_FILE = "portal-agro-db/docker-compose.yml"
 
                     echo """
                     ✅ Rama detectada: ${env.BRANCH_NAME}
@@ -63,32 +62,20 @@ pipeline {
                 script {
                     docker.image('mcr.microsoft.com/dotnet/sdk:9.0')
                         .inside('-v /var/run/docker.sock:/var/run/docker.sock -u root:root') {
-                            sh '''
+                        sh '''
                             echo "🔧 Restaurando dependencias .NET..."
                             cd Portal-Agro-comercial-del-Huila
                             dotnet restore Web/Web.csproj
                             dotnet build Web/Web.csproj --configuration Release
                             dotnet publish Web/Web.csproj -c Release -o ./publish
                         '''
-                        }
+                    }
                 }
             }
         }
 
         // =======================================================
-        // 4️⃣ CONSTRUIR IMAGEN DOCKER
-        // =======================================================
-        stage('Construir imagen Docker') {
-            steps {
-                sh """
-                    echo "🐳 Construyendo imagen Docker para Portal-Agro-comercial-del-Huila (${env.ENVIRONMENT})"
-                    docker build -t portal-agro-api-${env.ENVIRONMENT}:latest -f Portal-Agro-comercial-del-Huila/Web/Dockerfile .
-                """
-            }
-        }
-
-        // =======================================================
-        // 5️⃣ PREPARAR RED Y BASES DE DATOS
+        // 4️⃣ PREPARAR RED Y BASES DE DATOS
         // =======================================================
         stage('Preparar red y base de datos') {
             steps {
@@ -105,16 +92,16 @@ pipeline {
         }
 
         // =======================================================
-        // 6️⃣ DESPLEGAR API CON DOCKER COMPOSE
+        // 5️⃣ DESPLEGAR API CON DOCKER COMPOSE
         // =======================================================
         stage('Desplegar portal-agro API') {
             steps {
-                dir('.') {
-                    sh """
-                        echo "🚀 Desplegando entorno: ${env.ENVIRONMENT}"
-                        docker compose -f ${env.COMPOSE_FILE} --env-file ${env.ENV_FILE} up -d --build
-                    """
-                }
+                sh """
+                    echo "🚀 Desplegando entorno: ${env.ENVIRONMENT}"
+                    export COMPOSE_DOCKER_CLI_BUILD=0
+                    export DOCKER_BUILDKIT=0
+                    docker compose -f ${env.COMPOSE_FILE} --env-file ${env.ENV_FILE} up -d --build
+                """
             }
         }
     }
@@ -127,7 +114,7 @@ pipeline {
             echo "💥 Error durante el despliegue en ${env.ENVIRONMENT}"
         }
         always {
-            echo '🧹 Limpieza final del pipeline completada.'
+            echo "🧹 Limpieza final del pipeline completada."
         }
     }
 }

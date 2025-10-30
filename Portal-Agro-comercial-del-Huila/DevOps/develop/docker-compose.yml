@@ -1,21 +1,21 @@
-version: "3.9"
+# Quita "version:" (obsoleta en Compose v2)
 
 services:
-  # 🌐 API principal - DEVELOP
   portal-agro-api-develop:
     container_name: portal-agro-api-develop
     build:
-      context: ../..
-      dockerfile: Web/Dockerfile
+      context: ../..   # ← workspace raíz (dos niveles arriba desde DevOps/develop)
+      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
+    image: portal-agro-api-develop:latest   # etiqueta útil para referenciar/depurar
     restart: always
     env_file:
       - .env
     ports:
-      - "5100:8080"
+      - "8080:8080"
     networks:
       - portal-agro_network
     labels:
-      - com.portal-agro.environment=develop
+      - com.portalagro.environment=develop
 
 networks:
   portal-agro_network:
