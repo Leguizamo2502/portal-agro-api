@@ -1,7 +1,4 @@
-version: "3.8"
-
 services:
-  # 🗄️ Base de datos PostgreSQL - PROD
   portal-agro-postgres-prod:
     image: postgres:16
     container_name: portal-agro-postgres-prod
@@ -9,25 +6,28 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gescomph_prod
+      POSTGRES_DB: portal-agro_prod
     ports:
       - "5435:5432"
     volumes:
       - pgdata_prod:/var/lib/postgresql/data
     networks:
       - network_prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
 
-  # 🌐 API principal - PROD
   portal-agro-api-prod:
+    image: portal-agro-api-prod:latest
     container_name: portal-agro-api-prod
-    build:
-      context: ../..
-      dockerfile: Web/Dockerfile
     restart: always
     env_file:
       - .env
     depends_on:
-      - portal-agro-postgres-prod
+      portal-agro-postgres-prod:
+        condition: service_healthy
     ports:
       - "5103:8080"
     networks:
