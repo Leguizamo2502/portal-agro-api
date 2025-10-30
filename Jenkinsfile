@@ -14,7 +14,6 @@ pipeline {
     }
 
     stages {
-
         // 1) Checkout
         stage('Checkout código fuente') {
             steps {
@@ -60,14 +59,14 @@ pipeline {
                 script {
                     docker.image('mcr.microsoft.com/dotnet/sdk:9.0')
                           .inside('-v /var/run/docker.sock:/var/run/docker.sock -u root:root') {
-                        sh """
+                              sh """
                             echo 'Restaurando dependencias .NET...'
                             cd ${APP_DIR}
                             dotnet restore Web/Web.csproj
                             dotnet build   Web/Web.csproj --configuration Release
                             dotnet publish Web/Web.csproj -c Release -o ./publish
                         """
-                    }
+                          }
                 }
             }
         }
@@ -75,11 +74,14 @@ pipeline {
         // 4) Construir imagen Docker de la API
         stage('Construir imagen Docker API') {
             steps {
-                dir("${APP_DIR}") {
+                script {
                     sh """
-                        echo 'Construyendo imagen Docker para ${env.ENVIRONMENT}...'
-                        docker build -t portal-agro-api-${env.ENVIRONMENT}:latest -f Web/Dockerfile .
-                    """
+                echo 'Construyendo imagen Docker para ${env.ENVIRONMENT}...'
+                docker build \
+                  -t portal-agro-api-${env.ENVIRONMENT}:latest \
+                  -f Portal-Agro-comercial-del-Huila/Web/Dockerfile \
+                  .
+            """
                 }
             }
         }
@@ -115,7 +117,7 @@ pipeline {
                     } else {
                         echo "Aviso: no existe ${env.ENV_FILE}; el compose usará valores por defecto/variables del sistema."
                     }
-                    composeCmd += " up -d --build"
+                    composeCmd += ' up -d --build'
                     sh composeCmd
                 }
             }
@@ -125,6 +127,6 @@ pipeline {
     post {
         success { echo "Despliegue completado correctamente para ${env.ENVIRONMENT}" }
         failure { echo "Error durante el despliegue en ${env.ENVIRONMENT}" }
-        always  { echo "Limpieza final del pipeline completada." }
+        always  { echo 'Limpieza final del pipeline completada.' }
     }
 }
