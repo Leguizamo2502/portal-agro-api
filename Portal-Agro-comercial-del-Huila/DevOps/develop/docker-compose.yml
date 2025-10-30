@@ -2,12 +2,12 @@ services:
   portal-agro-api-develop:
     container_name: portal-agro-api-develop
     build:
-      context: ${WORKSPACE_DIR}/Portal-Agro-comercial-del-Huila
-      dockerfile: Web/Dockerfile
+      context: ../../                # raíz del repo
+      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
     image: portal-agro-api-develop:latest
     restart: always
     env_file:
-      - .env
+      - .env                         # este .env está junto al compose (DevOps/develop/.env)
     ports:
       - "8080:8080"
     networks:
