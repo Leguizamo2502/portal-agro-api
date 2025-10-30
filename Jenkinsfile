@@ -84,7 +84,7 @@ pipeline {
                 dir('Portal-Agro-comercial-del-Huila') {
                     sh """
                         echo "🐳 Construyendo imagen Docker para Portal-Agro-comercial-del-Huila (${env.ENVIRONMENT})"
-                        docker build -t portal-agro-api-${env.ENVIRONMENT}:latest -f Web/Dockerfile .
+                        docker build -t portal-agro-api-${env.ENVIRONMENT}:latest -f Portal-Agro-comercial-del-Huila/Web/Dockerfile .
                     """
                 }
             }
