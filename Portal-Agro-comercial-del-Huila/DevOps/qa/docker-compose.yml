@@ -1,7 +1,5 @@
-version: '3.8'
-
+# Portal-Agro-comercial-del-Huila/DevOps/qa/docker-compose.yml
 services:
-  # 🗄️ Base de datos PostgreSQL - QA
   portal-agro-postgres-qa:
     image: postgres:16
     container_name: portal-agro-postgres-qa
@@ -11,18 +9,15 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: portal-agro_qa
     ports:
-      - "5433:5432"      # mapeamos distinto al host
+      - "5433:5432"
     volumes:
       - pgdata_qa:/var/lib/postgresql/data
     networks:
       - network_qa
 
-  # 🌐 API principal - QA
   portal-agro-api-qa:
+    image: portal-agro-api-qa:latest     # <— usar imagen, no build
     container_name: portal-agro-api-qa
-    build:
-      context: ../..
-      dockerfile: Web/Dockerfile
     restart: always
     env_file:
       - .env
