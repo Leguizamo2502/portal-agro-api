@@ -2,8 +2,8 @@ services:
   portal-agro-api-develop:
     container_name: portal-agro-api-develop
     build:
-      context: ../..                      # workspace raíz (dos niveles arriba)
-      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
+      context: ../../Portal-Agro-comercial-del-Huila   # ← entra directo a la carpeta del proyecto
+      dockerfile: Web/Dockerfile                       # ← relativo al context, sin prefijos repetidos
     image: portal-agro-api-develop:latest
     restart: always
     env_file:
