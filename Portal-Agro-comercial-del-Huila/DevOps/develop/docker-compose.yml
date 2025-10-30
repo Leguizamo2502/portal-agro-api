@@ -1,41 +1,22 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  # 🗄️ Base de datos PostgreSQL - DEVELOP
-  portal-agro-postgres-develop:
-    image: postgres:16
-    container_name: portal-agro-postgres-develop
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: portal-agro_develop
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata_develop:/var/lib/postgresql/data
-    networks:
-      - network_develop
-
   # 🌐 API principal - DEVELOP
   portal-agro-api-develop:
-    image: portal-agro-api-develop:latest
     container_name: portal-agro-api-develop
+    build:
+      context: ../..
+      dockerfile: Web/Dockerfile
     restart: always
     env_file:
       - .env
-    depends_on:
-      - portal-agro-postgres-develop
     ports:
       - "5100:8080"
     networks:
-      - network_develop
+      - portal-agro_network
     labels:
       - com.portal-agro.environment=develop
 
-volumes:
-  pgdata_develop:
-
 networks:
-  network_develop:
-    driver: bridge
+  portal-agro_network:
+    external: true
