@@ -9,13 +9,12 @@ pipeline {
     }
 
     stages {
-
         // =======================================================
         // 1️⃣ CHECKOUT
         // =======================================================
         stage('Checkout código fuente') {
             steps {
-                echo "📥 Clonando repositorio desde GitHub..."
+                echo '📥 Clonando repositorio desde GitHub...'
                 checkout scm
                 sh 'ls -R Portal-Agro-comercial-del-Huila/DevOps || true'
             }
@@ -37,7 +36,7 @@ pipeline {
                     env.ENV_DIR = "Portal-Agro-comercial-del-Huila/DevOps/${env.ENVIRONMENT}"
                     env.COMPOSE_FILE = "${env.ENV_DIR}/docker-compose.yml"
                     env.ENV_FILE = "${env.ENV_DIR}/.env"
-                    env.DB_COMPOSE_FILE = "portal-agro-db/docker-compose.yml"
+                    env.DB_COMPOSE_FILE = 'portal-agro-db/docker-compose.yml'
 
                     echo """
                     ✅ Rama detectada: ${env.BRANCH_NAME}
@@ -62,14 +61,14 @@ pipeline {
                 script {
                     docker.image('mcr.microsoft.com/dotnet/sdk:9.0')
                         .inside('-v /var/run/docker.sock:/var/run/docker.sock -u root:root') {
-                        sh '''
+                            sh '''
                             echo "🔧 Restaurando dependencias .NET..."
                             cd Portal-Agro-comercial-del-Huila
                             dotnet restore Web/Web.csproj
                             dotnet build Web/Web.csproj --configuration Release
                             dotnet publish Web/Web.csproj -c Release -o ./publish
                         '''
-                    }
+                        }
                 }
             }
         }
@@ -98,8 +97,16 @@ pipeline {
             steps {
                 sh """
                     echo "🚀 Desplegando entorno: ${env.ENVIRONMENT}"
+                    export WORKSPACE_DIR="$(pwd)"         # ruta absoluta al workspace
                     export COMPOSE_DOCKER_CLI_BUILD=0
                     export DOCKER_BUILDKIT=0
+
+                    echo "DEBUG WORKSPACE_DIR=$WORKSPACE_DIR"
+                    ls -la "$WORKSPACE_DIR/Portal-Agro-comercial-del-Huila/Web" || true
+
+                    echo "Compose config RESUELTO:"
+                    docker compose -f ${env.COMPOSE_FILE} --env-file ${env.ENV_FILE} config | sed -n '1,160p'
+
                     docker compose -f ${env.COMPOSE_FILE} --env-file ${env.ENV_FILE} up -d --build
                 """
             }
@@ -114,7 +121,7 @@ pipeline {
             echo "💥 Error durante el despliegue en ${env.ENVIRONMENT}"
         }
         always {
-            echo "🧹 Limpieza final del pipeline completada."
+            echo '🧹 Limpieza final del pipeline completada.'
         }
     }
 }
