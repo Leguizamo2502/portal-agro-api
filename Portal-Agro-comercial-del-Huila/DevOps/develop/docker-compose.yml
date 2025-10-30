@@ -2,8 +2,8 @@ services:
   portal-agro-api-develop:
     container_name: portal-agro-api-develop
     build:
-      context: ../../Portal-Agro-comercial-del-Huila/Web
-      dockerfile: Dockerfile
+      context: ../..                      # raíz: Portal-Agro-comercial-del-Huila/
+      dockerfile: Web/Dockerfile          # relativo al context
     image: portal-agro-api-develop:latest
     restart: always
     env_file:
