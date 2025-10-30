@@ -1,12 +1,10 @@
-# Quita "version:" (obsoleta en Compose v2)
-
 services:
   portal-agro-api-develop:
     container_name: portal-agro-api-develop
     build:
-      context: ../..   # ← workspace raíz (dos niveles arriba desde DevOps/develop)
+      context: ../..                      # workspace raíz (dos niveles arriba)
       dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
-    image: portal-agro-api-develop:latest   # etiqueta útil para referenciar/depurar
+    image: portal-agro-api-develop:latest
     restart: always
     env_file:
       - .env
