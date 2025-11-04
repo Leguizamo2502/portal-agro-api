@@ -1,41 +1,30 @@
-version: '3.8'
-
 services:
-  # 🗄️ Base de datos PostgreSQL - DEVELOP
-  portal-agro-postgres-develop:
-    image: postgres:16
-    container_name: portal-agro-postgres-develop
+  portal-agro-api-develop:
+    container_name: portal-agro-api-develop
+    build:
+      context: ../../../                # ← raíz del repo
+      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
+    image: portal-agro-api-develop:latest
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: portal-agro_develop
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata_develop:/var/lib/postgresql/data
-    networks:
-      - network_develop
-
-  # 🌐 API principal - DEVELOP
-  portal-agro-api-develop:
-    image: portal-agro-api-develop:latest
-    container_name: portal-agro-api-develop
-    restart: always
+      # ===== SMTP / Gmail =====
+      - CONFIG_EMAIL__EMAIL=portalagrocomercialhuila@gmail.com
+      - CONFIG_EMAIL__HOST=smtp.gmail.com
+      - CONFIG_EMAIL__PORT=587
+      # ATENCIÓN: las contraseñas de app de Google se usan SIN espacios
+      - CONFIG_EMAIL__PASSWORD=qtckwqqwgnmarosr
+      # 587 => STARTTLS
+      - CONFIG_EMAIL__USESTARTTLS=true
+      - CONFIG_EMAIL__USESSL=false
     env_file:
       - .env
-    depends_on:
-      - portal-agro-postgres-develop
     ports:
       - "5100:8080"
     networks:
-      - network_develop
+      - portal-agro_network
     labels:
-      - com.portal-agro.environment=develop
-
-volumes:
-  pgdata_develop:
+      - com.portalagro.environment=develop
 
 networks:
-  network_develop:
-    driver: bridge
+  portal-agro_network:
+    external: true
