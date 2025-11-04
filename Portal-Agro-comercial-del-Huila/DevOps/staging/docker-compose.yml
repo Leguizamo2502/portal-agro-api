@@ -1,43 +1,20 @@
-version: "3.8"
-
 services:
-  # 🗄️ Base de datos PostgreSQL - STAGING
-  portal-agro-postgres-staging:
-    image: postgres:16
-    container_name: portal-agro-postgres-staging
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: portal-agro_staging
-    ports:
-      - "5434:5432"
-    volumes:
-      - pgdata_staging:/var/lib/postgresql/data
-    networks:
-      - network_staging
-
-  # 🌐 API principal - STAGING
   portal-agro-api-staging:
     container_name: portal-agro-api-staging
     build:
-      context: ../..
-      dockerfile: WebGESCOMPH/Dockerfile
+      context: ../../../                # ← raíz del repo
+      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
+    image: portal-agro-api-staging:latest
     restart: always
     env_file:
       - .env
-    depends_on:
-      - portal-agro-postgres-staging
     ports:
       - "5102:8080"
     networks:
-      - network_staging
+      - portal-agro_network
     labels:
-      - com.portal-agro.environment=staging
-
-volumes:
-  pgdata_staging:
+      - com.portalagro.environment=staging
 
 networks:
-  network_staging:
-    driver: bridge
+  portal-agro_network:
+    external: true

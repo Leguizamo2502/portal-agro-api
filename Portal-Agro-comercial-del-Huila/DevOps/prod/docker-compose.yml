@@ -1,43 +1,20 @@
-version: "3.8"
-
 services:
-  # 🗄️ Base de datos PostgreSQL - PROD
-  portal-agro-postgres-prod:
-    image: postgres:16
-    container_name: portal-agro-postgres-prod
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gescomph_prod
-    ports:
-      - "5435:5432"
-    volumes:
-      - pgdata_prod:/var/lib/postgresql/data
-    networks:
-      - network_prod
-
-  # 🌐 API principal - PROD
   portal-agro-api-prod:
     container_name: portal-agro-api-prod
     build:
-      context: ../..
-      dockerfile: Web/Dockerfile
+      context: ../../../                # ← raíz del repo
+      dockerfile: Portal-Agro-comercial-del-Huila/Web/Dockerfile
+    image: portal-agro-api-prod:latest
     restart: always
     env_file:
       - .env
-    depends_on:
-      - portal-agro-postgres-prod
     ports:
       - "5103:8080"
     networks:
-      - network_prod
+      - portal-agro_network
     labels:
-      - com.portal-agro.environment=prod
-
-volumes:
-  pgdata_prod:
+      - com.portalagro.environment=prod
 
 networks:
-  network_prod:
-    driver: bridge
+  portal-agro_network:
+    external: true
