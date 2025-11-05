@@ -11,8 +11,6 @@ namespace Entity.Domain.Models.Implements.Location
         public string Name { get; set; }
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
-        public string? CodePostal { get; set; }
-
         public ICollection<Person>? People { get; set; } = [];
         public ICollection<Farm>? Farms { get; set; } = [];
 
