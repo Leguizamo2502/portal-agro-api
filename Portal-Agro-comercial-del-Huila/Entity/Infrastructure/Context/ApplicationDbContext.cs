@@ -2,6 +2,7 @@
 using Entity.Domain.Models.Implements.Auth;
 using Entity.Domain.Models.Implements.Auth.Token;
 using Entity.Domain.Models.Implements.Favorites;
+using Entity.Domain.Models.Implements.Notifications;
 using Entity.Domain.Models.Implements.Orders;
 using Entity.Domain.Models.Implements.Producers;
 using Entity.Domain.Models.Implements.Producers.Farms;
@@ -200,5 +201,8 @@ namespace Entity.Infrastructure.Context
 
         //Order
         public DbSet<Order> Orders { get; set; }
+
+        //Notifications
+        public DbSet<Notification> Notifications { get; set; }
     }
 }
