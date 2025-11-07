@@ -37,8 +37,19 @@ namespace Entity.Infrastructure.DataInit.Producers
                     Active = true,
                     IsDeleted = false,
                     CreateAt = new DateTime(2025, 1, 1)
+                },
+                new Producer
+                {
+                    Id = 3,
+                    Code = "AB7KX92TSZ",
+                    Description = "Prueba de integracion",
+                    UserId = 5,
+                    QrUrl = "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png",
+                    Active = true,
+                    IsDeleted = false,
+                    CreateAt = new DateTime(2025, 1, 1)
                 }
-                );
+            );
         }
     }
 }

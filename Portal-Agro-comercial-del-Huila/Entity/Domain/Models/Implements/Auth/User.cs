@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Entity.Domain.Models.Base;
+﻿using Entity.Domain.Models.Base;
 using Entity.Domain.Models.Implements.Favorites;
+using Entity.Domain.Models.Implements.Notifications;
 using Entity.Domain.Models.Implements.Orders;
 using Entity.Domain.Models.Implements.Producers;
 using Entity.Domain.Models.Implements.Security;
@@ -15,7 +11,6 @@ namespace Entity.Domain.Models.Implements.Auth
     {
         public string Email { get; set; }
         public string Password { get; set; }
-        //public bool Active { get; set; } = true;
 
         // Clave foránea obligatoria
         public int PersonId { get; set; }
@@ -27,6 +22,7 @@ namespace Entity.Domain.Models.Implements.Auth
         public ICollection<Favorite> Favorites { get; set; } = [];
         public ICollection<Review> Reviews { get; set; } = [];
         public ICollection<Order> Orders { get; set; } = [];
+        public ICollection<Notification> Notifications { get; set; } = [];
 
 
 

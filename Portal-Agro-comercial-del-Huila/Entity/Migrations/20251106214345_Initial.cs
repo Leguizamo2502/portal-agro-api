@@ -298,6 +298,34 @@ namespace Entity.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    ReadAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RelatedType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RelatedRoute = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Active = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Producers",
                 columns: table => new
                 {
@@ -887,7 +915,9 @@ namespace Entity.Migrations
                 {
                     { 1, true, "Calle 1 # 1-1", 33, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Persona1", "000000000", false, "Persona1", "3000000000" },
                     { 2, true, "Carrera 10 # 20-15", 34, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Persona2", "000000001", false, "Persona2", "3000000001" },
-                    { 3, true, "Avenida 3 # 5-30", 35, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Persona3", "000000002", false, "Persona3", "3000000003" }
+                    { 3, true, "Avenida 3 # 5-30", 35, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Persona3", "000000002", false, "Persona3", "3000000003" },
+                    { 4, true, "Avenida 3 # 5-30", 33, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Sergio", "000000003", false, "Leguizamo", "3000000004" },
+                    { 5, true, "Avenida 3 # 5-30", 33, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Ruben", "000000004", false, "Leguizamo", "3000000005" }
                 });
 
             migrationBuilder.InsertData(
@@ -897,7 +927,9 @@ namespace Entity.Migrations
                 {
                     { 1, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "admin@example.com", false, "3b612c75a7b5048a435fb6ec81e52ff92d6d795a8b5a9c17070f6a63c97a53b2", 1 },
                     { 2, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "user@example.com", false, "a61a8adf60038792a2cb88e670b20540a9d6c2ca204ab754fc768950e79e7d36", 2 },
-                    { 3, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "producer@example.com", false, "5cc500a2237915f8c6d906d4ea5c9632a3e0a6220d7cdffc620fe36cbbb92316", 3 }
+                    { 3, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "producer@example.com", false, "5cc500a2237915f8c6d906d4ea5c9632a3e0a6220d7cdffc620fe36cbbb92316", 3 },
+                    { 4, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "vargasleguizamo95@gmail.com", false, "d6f8686c016c37e60dc4ff02cf57ea600083db7f0c4b84d3879b976f4f58ef90", 4 },
+                    { 5, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "sergiochechovargas@gmail.com", false, "d6f8686c016c37e60dc4ff02cf57ea600083db7f0c4b84d3879b976f4f58ef90", 5 }
                 });
 
             migrationBuilder.InsertData(
@@ -906,7 +938,8 @@ namespace Entity.Migrations
                 values: new object[,]
                 {
                     { 1, true, "M3QPD6Y8ZR", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Hola vendo papa", false, "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png", 3 },
-                    { 2, true, "AB7KX92TQF", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Hola vendo papa modo admin", false, "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png", 1 }
+                    { 2, true, "AB7KX92TQF", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Hola vendo papa modo admin", false, "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png", 1 },
+                    { 3, true, "AB7KX92TSZ", new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Prueba de integracion", false, "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png", 5 }
                 });
 
             migrationBuilder.InsertData(
@@ -919,7 +952,10 @@ namespace Entity.Migrations
                     { 3, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 3, 1 },
                     { 4, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 3, 3 },
                     { 5, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, 3 },
-                    { 6, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, 2 }
+                    { 6, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, 2 },
+                    { 7, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, 4 },
+                    { 8, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, 5 },
+                    { 9, true, new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 3, 5 }
                 });
 
             migrationBuilder.InsertData(
@@ -927,7 +963,7 @@ namespace Entity.Migrations
                 columns: new[] { "Id", "Active", "Altitude", "CityId", "CreateAt", "Hectares", "IsDeleted", "Latitude", "Longitude", "Name", "ProducerId" },
                 values: new object[,]
                 {
-                    { 1, true, 1600.0, 33, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4.0, false, 1200.0, 600.0, "Finca el Jardin", 1 },
+                    { 1, true, 1600.0, 33, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4.0, false, 1200.0, 600.0, "Finca el Jardin", 3 },
                     { 2, true, 1600.0, 33, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4.0, false, 1200.0, 600.0, "Finca el Mirador", 1 },
                     { 3, true, 1600.0, 33, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4.0, false, 1200.0, 600.0, "Finca los Alpes", 1 },
                     { 4, true, 1600.0, 33, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4.0, false, 1200.0, 600.0, "Finca los Lulos", 1 },
@@ -960,7 +996,7 @@ namespace Entity.Migrations
                     { 19, true, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Granos cultivados a 1600msnm", false, "Café de Altura", 35000m, 1, "270 lb trimestral", false, true, 200, "lb" },
                     { 20, true, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Versión fuerte ideal para espresso", false, "Café Lulo Espresso", 35500m, 1, "160 lb mensual", false, true, 190, "lb" },
                     { 21, true, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Mezcla gourmet café y cacao", false, "Café Cacao Fusion", 39000m, 1, "240 lb trimestral", false, true, 150, "lb" },
-                    { 22, true, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Selección premium para exportación", false, "Café de Exportación", 40000m, 1, "300 lb cada 2 meses", false, true, 220, "lb" }
+                    { 22, true, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Selección premium para exportación", false, "Café de PRUEBA", 40000m, 3, "300 lb cada 2 meses", false, true, 220, "lb" }
                 });
 
             migrationBuilder.InsertData(
@@ -1080,6 +1116,11 @@ namespace Entity.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_CityId",
                 table: "Orders",
                 column: "CityId");
@@ -1197,6 +1238,9 @@ namespace Entity.Migrations
 
             migrationBuilder.DropTable(
                 name: "FormModules");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "Orders");

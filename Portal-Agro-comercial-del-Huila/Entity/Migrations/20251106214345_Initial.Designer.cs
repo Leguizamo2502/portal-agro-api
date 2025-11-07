@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entity.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251105180814_Initial")]
+    [Migration("20251106214345_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -146,6 +146,32 @@ namespace Entity.Migrations
                             IsDeleted = false,
                             LastName = "Persona3",
                             PhoneNumber = "3000000003"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Active = true,
+                            Address = "Avenida 3 # 5-30",
+                            CityId = 33,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Sergio",
+                            Identification = "000000003",
+                            IsDeleted = false,
+                            LastName = "Leguizamo",
+                            PhoneNumber = "3000000004"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Active = true,
+                            Address = "Avenida 3 # 5-30",
+                            CityId = 33,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Ruben",
+                            Identification = "000000004",
+                            IsDeleted = false,
+                            LastName = "Leguizamo",
+                            PhoneNumber = "3000000005"
                         });
                 });
 
@@ -246,6 +272,26 @@ namespace Entity.Migrations
                             IsDeleted = false,
                             Password = "5cc500a2237915f8c6d906d4ea5c9632a3e0a6220d7cdffc620fe36cbbb92316",
                             PersonId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Active = true,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "vargasleguizamo95@gmail.com",
+                            IsDeleted = false,
+                            Password = "d6f8686c016c37e60dc4ff02cf57ea600083db7f0c4b84d3879b976f4f58ef90",
+                            PersonId = 4
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Active = true,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "sergiochechovargas@gmail.com",
+                            IsDeleted = false,
+                            Password = "d6f8686c016c37e60dc4ff02cf57ea600083db7f0c4b84d3879b976f4f58ef90",
+                            PersonId = 5
                         });
                 });
 
@@ -932,6 +978,53 @@ namespace Entity.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Entity.Domain.Models.Implements.Notifications.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RelatedRoute")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RelatedType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Entity.Domain.Models.Implements.Orders.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -1163,7 +1256,7 @@ namespace Entity.Migrations
                             Latitude = 1200.0,
                             Longitude = 600.0,
                             Name = "Finca el Jardin",
-                            ProducerId = 1
+                            ProducerId = 3
                         },
                         new
                         {
@@ -1379,6 +1472,17 @@ namespace Entity.Migrations
                             IsDeleted = false,
                             QrUrl = "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png",
                             UserId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Active = true,
+                            Code = "AB7KX92TSZ",
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Prueba de integracion",
+                            IsDeleted = false,
+                            QrUrl = "https://res.cloudinary.com/djj163sc9/image/upload/v1756782308/qr_png_e6xgom.png",
+                            UserId = 5
                         });
                 });
 
@@ -2190,9 +2294,9 @@ namespace Entity.Migrations
                             CreateAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Selección premium para exportación",
                             IsDeleted = false,
-                            Name = "Café de Exportación",
+                            Name = "Café de PRUEBA",
                             Price = 40000m,
-                            ProducerId = 1,
+                            ProducerId = 3,
                             Production = "300 lb cada 2 meses",
                             ShippingIncluded = false,
                             Status = true,
@@ -3572,6 +3676,33 @@ namespace Entity.Migrations
                             IsDeleted = false,
                             RolId = 2,
                             UserId = 2
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Active = true,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            RolId = 2,
+                            UserId = 4
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Active = true,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            RolId = 2,
+                            UserId = 5
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Active = true,
+                            CreateAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            RolId = 3,
+                            UserId = 5
                         });
                 });
 
@@ -3625,6 +3756,17 @@ namespace Entity.Migrations
                         .IsRequired();
 
                     b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("Entity.Domain.Models.Implements.Notifications.Notification", b =>
+                {
+                    b.HasOne("Entity.Domain.Models.Implements.Auth.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Entity.Domain.Models.Implements.Orders.Order", b =>
@@ -3858,6 +4000,8 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.Domain.Models.Implements.Auth.User", b =>
                 {
                     b.Navigation("Favorites");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Orders");
 

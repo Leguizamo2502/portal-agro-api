@@ -42,7 +42,30 @@ namespace Entity.Infrastructure.DataInit.Auth
                     Active = true,
                     IsDeleted = false,
                     CreateAt = initialDate
+                },
+
+                new User
+                {
+                    Id = 4,
+                    Email = "vargasleguizamo95@gmail.com",
+                    Password = EncriptePassword.EncripteSHA256("Leguizamo05"),
+                    PersonId = 4,
+                    Active = true,
+                    IsDeleted = false,
+                    CreateAt = initialDate
+                },
+
+                new User
+                {
+                    Id = 5,
+                    Email = "sergiochechovargas@gmail.com",
+                    Password = EncriptePassword.EncripteSHA256("Leguizamo05"),
+                    PersonId = 5,
+                    Active = true,
+                    IsDeleted = false,
+                    CreateAt = initialDate
                 }
+
             );
 
         }

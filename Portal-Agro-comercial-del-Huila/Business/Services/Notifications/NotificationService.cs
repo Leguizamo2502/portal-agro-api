@@ -2,16 +2,22 @@
 using Data.Interfaces.Implements.Notifications;
 using Entity.Domain.Models.Implements.Notifications;
 using Entity.DTOs.Notifications;
+using Mapster;
+using MapsterMapper;
 
 namespace Business.Services.Notifications
 {
     public class NotificationService : INotificationService
     {
         private readonly INotificationRepository _repo;
+        private readonly INotificationPusher _pusher;
+        private readonly IMapper _mapper;
 
-        public NotificationService(INotificationRepository repo)
+        public NotificationService(INotificationRepository repo, INotificationPusher pusher, IMapper mapper)
         {
             _repo = repo;
+            _pusher = pusher;
+            _mapper = mapper;
         }
 
         public async Task<int> CreateAsync(CreateNotificationRequest request, CancellationToken ct = default)
@@ -20,23 +26,21 @@ namespace Business.Services.Notifications
             if (string.IsNullOrWhiteSpace(request.Title)) throw new ArgumentException("Title es obligatorio");
             if (string.IsNullOrWhiteSpace(request.Message)) throw new ArgumentException("Message es obligatorio");
 
-            var entity = new Notification
-            {
-                UserId = request.UserId,
-                Title = request.Title.Trim(),
-                Message = request.Message.Trim(),
-                RelatedType = string.IsNullOrWhiteSpace(request.RelatedType) ? null : request.RelatedType.Trim(),
-                RelatedRoute = string.IsNullOrWhiteSpace(request.RelatedRoute) ? null : request.RelatedRoute.Trim(),
-                IsRead = false,
-                ReadAtUtc = null,
-                CreateAt = DateTime.UtcNow,
-                IsDeleted = false,
-                Active = true
-            };
+            var entity = _mapper.Map<Notification>(request);
+
+            entity.CreateAt = DateTime.UtcNow;
+            entity.IsRead = false;
+            entity.IsDeleted = false;
+            entity.Active = true;
 
             var saved = await _repo.AddAsync(entity);
+
+            var dto = _mapper.Map<NotificationListItemDto>(saved);
+            await _pusher.PushToUserAsync(saved.UserId, dto, ct);
+
             return saved.Id;
         }
+
 
         public async Task<IReadOnlyList<NotificationListItemDto>> GetUnreadAsync(int userId, int take = 20, CancellationToken ct = default)
         {

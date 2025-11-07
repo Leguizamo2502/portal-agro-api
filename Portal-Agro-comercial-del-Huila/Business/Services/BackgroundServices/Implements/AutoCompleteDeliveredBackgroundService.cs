@@ -1,14 +1,17 @@
-﻿using Business.Services.BackgroundServices.Options;
+﻿using Business.Interfaces.Implements.Notification;
+using Business.Services.BackgroundServices.Options;
 using Data.Interfaces.Implements.Auth;
 using Data.Interfaces.Implements.Producers;
 using Entity.Domain.Enums;
 using Entity.Domain.Models.Implements.Orders;
+using Entity.DTOs.Notifications;
 using Entity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Utilities.Exceptions;
 using Utilities.Messaging.Interfaces;
 
 namespace Business.Services.BackgroundServices.Implements
@@ -48,9 +51,6 @@ namespace Business.Services.BackgroundServices.Implements
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var emailSvc = scope.ServiceProvider.GetRequiredService<IOrderEmailService>();
-            var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-            var producerRepo = scope.ServiceProvider.GetRequiredService<IProducerRepository>();
 
             var now = DateTime.UtcNow;
 
@@ -79,13 +79,14 @@ namespace Business.Services.BackgroundServices.Implements
                     var emailItem = itemScope.ServiceProvider.GetRequiredService<IOrderEmailService>();
                     var userRepoItem = itemScope.ServiceProvider.GetRequiredService<IUserRepository>();
                     var producerRepoItem = itemScope.ServiceProvider.GetRequiredService<IProducerRepository>();
+                    var notifSvc = itemScope.ServiceProvider.GetRequiredService<INotificationService>(); // <- en el itemScope
 
                     var order = await dbItem.Set<Order>().FirstOrDefaultAsync(o => o.Id == id, ct);
                     if (order == null || order.IsDeleted || !order.Active) continue;
                     if (order.Status != OrderStatus.DeliveredPendingBuyerConfirm) continue;
                     if (order.AutoCloseAt == null || order.AutoCloseAt > DateTime.UtcNow) continue;
 
-                    // Autocierre: completar
+                    // 1) Autocierre: completar
                     order.Status = OrderStatus.Completed;
                     order.UserReceivedAnswer = UserReceivedAnswer.Yes; // autoconsentido
                     order.UserReceivedAt = DateTime.UtcNow;
@@ -94,6 +95,7 @@ namespace Business.Services.BackgroundServices.Implements
                     await dbItem.SaveChangesAsync(ct);
                     done++;
 
+                    // 2) Emails (opcional, según flag)
                     if (_opts.SendEmails)
                     {
                         try
@@ -110,7 +112,7 @@ namespace Business.Services.BackgroundServices.Implements
                                     completedAtUtc: order.UserReceivedAt!.Value
                                 );
                             }
-                            // NUEVO: correo al cliente (auto-completado)
+
                             var customer = await userRepoItem.GetContactUser(order.UserId);
                             if (customer != null)
                             {
@@ -130,10 +132,40 @@ namespace Business.Services.BackgroundServices.Implements
                             _logger.LogError(exMail, "Error enviando correos de autocierre OrderId {OrderId}", order.Id);
                         }
                     }
+
+                    // 3) Notificaciones (best-effort)
+                    try
+                    {
+                        var producerNtc = await producerRepoItem.GetByIdAsync(order.ProducerIdSnapshot)
+                            ?? throw new BusinessException("No se pudo obtener el contacto del productor.");
+                        // Productor
+                        await notifSvc.CreateAsync(new CreateNotificationRequest
+                        {
+                            UserId = producerNtc.UserId,
+                            Title = "Pedido completado automáticamente",
+                            Message = $"El pedido {order.Code} se completó por tiempo expirado sin confirmación del cliente.",
+                            RelatedType = "Order",
+                            RelatedRoute = $"/producer/orders/{order.Id}"
+                        }, ct);
+
+                        // Cliente
+                        await notifSvc.CreateAsync(new CreateNotificationRequest
+                        {
+                            UserId = order.UserId,
+                            Title = "Pedido completado automáticamente",
+                            Message = $"Tu pedido {order.Code} se marcó como completado automáticamente.",
+                            RelatedType = "Order",
+                            RelatedRoute = $"/orders/{order.Id}"
+                        }, ct);
+                    }
+                    catch (Exception exNotif)
+                    {
+                        _logger.LogError(exNotif, "Error enviando notificaciones (auto-complete) OrderId {OrderId}", order.Id);
+                    }
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
-                    // Otro proceso la tocó; ignorar
+                    _logger.LogWarning(ex, "Concurrency al autocerrar OrderId {OrderId}. Otro proceso la modificó; se omite.", id);
                 }
                 catch (Exception ex)
                 {

@@ -1,6 +1,7 @@
 ﻿using Business.CustomJwt;
 using Business.Interfaces.Implements.Auth;
 using Business.Interfaces.Implements.Location;
+using Business.Interfaces.Implements.Notification;
 using Business.Interfaces.Implements.Orders;
 using Business.Interfaces.Implements.Orders.Reviews;
 using Business.Interfaces.Implements.Producers;
@@ -14,6 +15,7 @@ using Business.Interfaces.Implements.Security.Mes;
 using Business.Mapping;
 using Business.Services.AuthService;
 using Business.Services.Location;
+using Business.Services.Notifications;
 using Business.Services.Orders;
 using Business.Services.Orders.Reviews;
 using Business.Services.Producers;
@@ -26,6 +28,7 @@ using Business.Services.Security;
 using Data.Interfaces.Implements.Auth;
 using Data.Interfaces.Implements.Favorites;
 using Data.Interfaces.Implements.Location;
+using Data.Interfaces.Implements.Notifications;
 using Data.Interfaces.Implements.Orders;
 using Data.Interfaces.Implements.Orders.Reviews;
 using Data.Interfaces.Implements.Producers;
@@ -42,6 +45,7 @@ using Data.Repository;
 using Data.Service.Auth;
 using Data.Service.Favorites;
 using Data.Service.Location;
+using Data.Service.Notifications;
 using Data.Service.Orders;
 using Data.Service.Orders.Reviews;
 using Data.Service.Producers;
@@ -58,6 +62,7 @@ using Utilities.Messaging.Implements;
 using Utilities.Messaging.Interfaces;
 using Utilities.QR.Interfaces;
 using Utilities.QR.Services;
+using Web.Hubs.Implements.Notifications;
 using Web.Infrastructures;
 
 namespace Web.ProgramService
@@ -160,6 +165,11 @@ namespace Web.ProgramService
             services.AddScoped<IAnalyticsService, AnalyticsService>();
 
             services.AddScoped<IProducerSocialLinkRepository,ProducerSocialLinkRepository>();
+
+            //Notificarion
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INotificationPusher, SignalRNotificationPusher>();
 
             //Qr
             services.AddScoped<IQrCodeService, QrCodeService>();

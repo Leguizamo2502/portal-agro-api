@@ -3,53 +3,45 @@ using Entity.Validation.Service;
 using Entity.Validations.interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Web.Hubs.Implements.Notifications;
 using Web.ProgramService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+//Configuración de servicios base
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Cors
-builder.Services.AddCustomCors(builder.Configuration);
-
-//Validations
+//FluentValidation
 builder.Services.AddScoped<IValidatorService, ValidatorService>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
-//Jwt y cookies
+//Autenticación y JWT
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddCustomCors(builder.Configuration);
-
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<CookieSettings>(builder.Configuration.GetSection("Cookie"));
 
-//Cloudinary
+//Servicios externos
 builder.Services.AddCloudinaryServices(builder.Configuration);
 
-//Services
+//Capa de aplicación, base de datos, background y cache
 builder.Services.AddApplicationServices();
-
-//Database
 builder.Services.AddDatabase(builder.Configuration);
-
-//Background Services
-builder.Services.AddBackgroundServices(builder.Configuration);  
-
-//Cache
+builder.Services.AddBackgroundServices(builder.Configuration);
 builder.Services.AddOutputCachePolicies();
 
+//SignalR y CORS
+builder.Services.AddSignalR();
+builder.Services.AddCustomCors(builder.Configuration);
+
+// Construcción de la aplicación
 var app = builder.Build();
 
-// Archivos estáticos
+//Archivos estáticos y Swagger
 app.UseStaticFiles();
 
-// Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -57,23 +49,29 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+
 app.UseHttpsRedirection();
 
-// ?? 1. Primero CORS 
+// CORS
 app.UseCors();
 
-// ?? 2. Luego autenticación 
+// Autenticación
 app.UseAuthentication();
 
-// ?? 3. Después autorización
+// Luego autorización
 app.UseAuthorization();
 
-//cache
+// Cache
 app.UseOutputCache();
-// ?? 4. Finalmente, los controladores
+
+// Controladores
 app.MapControllers();
 
-// ?? 5. MIGRACIONES EN ARRANQUE
+// Hubs
+app.MapHub<NotificationHub>("/hubs/notifications");
+
+// Migraciones en arranque
 MigrationManager.MigrateAllDatabases(app.Services, builder.Configuration);
+
 
 app.Run();
