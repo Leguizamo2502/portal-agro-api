@@ -33,7 +33,7 @@ namespace Entity.Infrastructure.DataInit.Producers.Products
                 new Product { Id = 19, Name = "Café de Altura", Description = "Granos cultivados a 1600msnm", Price = 35000m, Unit = "lb", Production = "270 lb trimestral", Stock = 200, Status = true, CategoryId = 8, ProducerId = 1, IsDeleted = false, Active = true, CreateAt = date },
                 new Product { Id = 20, Name = "Café Lulo Espresso", Description = "Versión fuerte ideal para espresso", Price = 35500m, Unit = "lb", Production = "160 lb mensual", Stock = 190, Status = true, CategoryId = 8, ProducerId = 1, IsDeleted = false, Active = true, CreateAt = date },
                 new Product { Id = 21, Name = "Café Cacao Fusion", Description = "Mezcla gourmet café y cacao", Price = 39000m, Unit = "lb", Production = "240 lb trimestral", Stock = 150, Status = true, CategoryId = 9, ProducerId = 1, IsDeleted = false, Active = true, CreateAt = date },
-                new Product { Id = 22, Name = "Café de Exportación", Description = "Selección premium para exportación", Price = 40000m, Unit = "lb", Production = "300 lb cada 2 meses", Stock = 220, Status = true, CategoryId = 8, ProducerId = 1, IsDeleted = false, Active = true, CreateAt = date }
+                new Product { Id = 22, Name = "Café de PRUEBA", Description = "Selección premium para exportación", Price = 40000m, Unit = "lb", Production = "300 lb cada 2 meses", Stock = 220, Status = true, CategoryId = 8, ProducerId = 3, IsDeleted = false, Active = true, CreateAt = date }
             );
         }
     }

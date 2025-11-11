@@ -74,6 +74,36 @@ namespace Entity.Infrastructure.DataInit.Security
                     CreateAt = initialDate,
                     Active = true,
                     IsDeleted = false
+                },
+
+                new RolUser
+                {
+                    Id = 7,
+                    UserId = 4,
+                    RolId = 2,  // Consumer
+                    CreateAt = initialDate,
+                    Active = true,
+                    IsDeleted = false
+                },
+
+                
+                new RolUser
+                {
+                    Id = 8,
+                    UserId = 5, 
+                    RolId = 2,  // Consumer
+                    CreateAt = initialDate,
+                    Active = true,
+                    IsDeleted = false
+                },
+                new RolUser
+                {
+                    Id = 9,
+                    UserId = 5,
+                    RolId = 3,  // producer
+                    CreateAt = initialDate,
+                    Active = true,
+                    IsDeleted = false
                 }
             );
         }

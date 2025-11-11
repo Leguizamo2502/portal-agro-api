@@ -21,7 +21,7 @@ namespace Entity.Infrastructure.DataInit.Producers.Farms
                     Altitude = 1600,
                     Latitude = 1200.0,
                     Longitude = 600.0,
-                    ProducerId = 1,
+                    ProducerId = 3,
                     CityId = 33,
                     IsDeleted = false,
                     Active = true,

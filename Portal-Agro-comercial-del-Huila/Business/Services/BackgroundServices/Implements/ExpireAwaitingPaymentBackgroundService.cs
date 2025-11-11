@@ -1,12 +1,18 @@
-﻿using Business.Services.BackgroundServices.Options;
+﻿using Business.Interfaces.Implements.Notification;                  
+using Business.Services.BackgroundServices.Options;
+using Data.Interfaces.Implements.Auth;
+using Data.Interfaces.Implements.Producers;
 using Entity.Domain.Enums;
 using Entity.Domain.Models.Implements.Orders;
+using Entity.DTOs.Notifications;                                     
 using Entity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Utilities.Exceptions;
+using Utilities.Messaging.Interfaces;
 
 namespace Business.Services.BackgroundServices.Implements
 {
@@ -17,9 +23,9 @@ namespace Business.Services.BackgroundServices.Implements
         private readonly ExpireAwaitingPaymentJobOptions _opts;
 
         public ExpireAwaitingPaymentBackgroundService(
-        IServiceScopeFactory scopeFactory,
-        IOptions<ExpireAwaitingPaymentJobOptions> opts,
-        ILogger<ExpireAwaitingPaymentBackgroundService> logger)
+            IServiceScopeFactory scopeFactory,
+            IOptions<ExpireAwaitingPaymentJobOptions> opts,
+            ILogger<ExpireAwaitingPaymentBackgroundService> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -59,13 +65,10 @@ namespace Business.Services.BackgroundServices.Implements
             }
         }
 
-
         private async Task RunOnceAsync(CancellationToken ct)
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var emailSvc = scope.ServiceProvider.GetRequiredService<Utilities.Messaging.Interfaces.IOrderEmailService>();
-            var logger = _logger;
 
             var now = DateTime.UtcNow;
 
@@ -90,44 +93,43 @@ namespace Business.Services.BackgroundServices.Implements
             foreach (var orderId in candidateIds)
             {
                 ct.ThrowIfCancellationRequested();
+
                 try
                 {
                     using var scopeItem = _scopeFactory.CreateScope();
                     var dbItem = scopeItem.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var emailItem = scopeItem.ServiceProvider.GetRequiredService<Utilities.Messaging.Interfaces.IOrderEmailService>();
+                    var emailItem = scopeItem.ServiceProvider.GetRequiredService<IOrderEmailService>();
+                    var userRepo = scopeItem.ServiceProvider.GetRequiredService<IUserRepository>();
+                    var producerRepo = scopeItem.ServiceProvider.GetRequiredService<IProducerRepository>();
+                    var notifSvc = scopeItem.ServiceProvider.GetRequiredService<INotificationService>(); 
 
-                    // Releer con tracking para control de concurrencia
-                    var order = await dbItem.Set<Entity.Domain.Models.Implements.Orders.Order>()
-                        .FirstOrDefaultAsync(o => o.Id == orderId, ct);
-
-                    if (order is null) continue; // ya no existe
+                    // Releer con tracking
+                    var order = await dbItem.Set<Order>().FirstOrDefaultAsync(o => o.Id == orderId, ct);
+                    if (order is null) continue;
                     if (order.IsDeleted || !order.Active) continue;
 
-                    // Guardas anti-race: si cambió el estado o ya subieron comprobante, saltar
+                    // Guardas anti-race
                     if (order.Status != OrderStatus.AcceptedAwaitingPayment) continue;
                     if (!string.IsNullOrWhiteSpace(order.PaymentImageUrl)) continue;
                     if (order.AutoCloseAt == null || order.AutoCloseAt > DateTime.UtcNow) continue;
 
-                    // Transición a Expired
+                    // 3) Transición a Expired
                     order.Status = OrderStatus.Expired;
-                    // Mantén AutoCloseAt como audit trail; no lo borres
-                    // Opcional: marca quién hizo el cambio (si llevas auditoría de usuario “system”)
+                    // Dejamos AutoCloseAt como audit trail
 
                     await dbItem.SaveChangesAsync(ct);
                     expiredCount++;
 
-                    // Notificar (best-effort)
+                    // 4) Emails (opcional)
                     if (_opts.SendEmails)
                     {
                         try
                         {
-                            // Necesitas email del usuario: puedes resolverlo vía tu repositorio de usuarios/contactos
-                            var userRepo = scopeItem.ServiceProvider.GetRequiredService<Data.Interfaces.Implements.Auth.IUserRepository>();
-                            var userContact = await userRepo.GetContactUser(order.UserId);
-                            if (userContact != null)
+                            var customer = await userRepo.GetContactUser(order.UserId);
+                            if (customer != null)
                             {
                                 await emailItem.SendOrderExpiredByNoPaymentToCustomer(
-                                    emailReceptor: userContact.Email,
+                                    emailReceptor: customer.Email,
                                     orderId: order.Id,
                                     productName: order.ProductNameSnapshot,
                                     quantityRequested: order.QuantityRequested,
@@ -135,11 +137,49 @@ namespace Business.Services.BackgroundServices.Implements
                                     expiredAtUtc: DateTime.UtcNow
                                 );
                             }
+
+                            var producer = await producerRepo.GetContactProducer(order.ProducerIdSnapshot);
+                            if (producer != null)
+                            {
+                                // Si tienes plantilla para productor, úsala; si no, omite.
+                                // Ejemplo opcional:
+                                // await emailItem.SendOrderExpiredToProducer(...);
+                            }
                         }
                         catch (Exception exEmail)
                         {
-                            logger.LogError(exEmail, "Error enviando correo de expiración para OrderId {OrderId}", order.Id);
+                            _logger.LogError(exEmail, "Error enviando correo de expiración para OrderId {OrderId}", order.Id);
                         }
+                    }
+
+                    // 5) Notificaciones (SIEMPRE, best-effort)
+                    try
+                    {
+                        // Cliente
+                        await notifSvc.CreateAsync(new CreateNotificationRequest
+                        {
+                            UserId = order.UserId,
+                            Title = "Pedido expirado",
+                            Message = $"Tu pedido {order.Code} expiró por no cargar el comprobante de pago a tiempo.",
+                            RelatedType = "Order",
+                            RelatedRoute = $"/orders/{order.Id}"
+                        }, ct);
+
+                        // Productor (útil para liberar seguimiento)
+                        var producerNtc = await producerRepo.GetByIdAsync(order.ProducerIdSnapshot)
+                            ?? throw new BusinessException("No se pudo obtener el contacto del productor.");
+                        await notifSvc.CreateAsync(new CreateNotificationRequest
+                        {
+                            UserId = producerNtc.UserId,
+                            Title = "Pedido expirado del cliente",
+                            Message = $"El pedido {order.Code} expiró por falta de comprobante de pago del cliente.",
+                            RelatedType = "Order",
+                            RelatedRoute = $"/producer/orders/{order.Id}"
+                        }, ct);
+                    }
+                    catch (Exception exNotif)
+                    {
+                        _logger.LogError(exNotif, "Error enviando notificaciones (expire) OrderId {OrderId}", order.Id);
                     }
                 }
                 catch (DbUpdateConcurrencyException)
@@ -154,6 +194,5 @@ namespace Business.Services.BackgroundServices.Implements
 
             _logger.LogInformation("Job expiró {Count} órdenes (lote {Batch})", expiredCount, candidateIds.Count);
         }
-
     }
 }

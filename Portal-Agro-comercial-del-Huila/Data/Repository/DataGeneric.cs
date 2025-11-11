@@ -18,12 +18,11 @@ namespace Data.Repository
         }
         public override async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.Where(e => e.IsDeleted == false)
-                            .ToListAsync();
+            return await _dbSet.AsNoTracking().Where(e => !e.IsDeleted).ToListAsync();
         }
         public override async Task<T?> GetByIdAsync(int id)
         {
-            return await _dbSet.FirstOrDefaultAsync(e => e.Id == id && e.IsDeleted == false);
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
         }
         public override async Task<T> AddAsync(T entity)
         {

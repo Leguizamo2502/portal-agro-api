@@ -1,4 +1,5 @@
 ﻿using Entity.Domain.Models.Implements.Auth;
+using Entity.Domain.Models.Implements.Notifications;
 using Entity.Domain.Models.Implements.Orders;
 using Entity.Domain.Models.Implements.Producers;
 using Entity.Domain.Models.Implements.Producers.Farms;
@@ -6,6 +7,7 @@ using Entity.Domain.Models.Implements.Producers.Products;
 using Entity.Domain.Models.Implements.Security;
 using Entity.DTOs.Auth;
 using Entity.DTOs.Auth.User;
+using Entity.DTOs.Notifications;
 using Entity.DTOs.Order.Create;
 using Entity.DTOs.Order.Reviews;
 using Entity.DTOs.Order.Select;
@@ -256,12 +258,11 @@ namespace Business.Mapping
                 .Map(dest => dest.RolName, src => src.Rol.Name)
                 .Map(dest => dest.FormName, src => src.Form.Name)
                 .Map(dest => dest.PermissionName, src => src.Permission.Name);
-                
 
 
-            //LOcation
-            //config.NewConfig<City, CitySelectDto>()
-            //    .Map(dest => dest.DepartmentName, src => src.Department.Name);
+
+            //Notifications
+            config.NewConfig<Notification, NotificationListItemDto>();
 
 
 

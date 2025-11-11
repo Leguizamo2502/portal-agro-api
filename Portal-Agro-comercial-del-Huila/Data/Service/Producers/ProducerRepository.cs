@@ -56,6 +56,7 @@ namespace Data.Service.Producers
             {
                 FirstName = p.User.Person.FirstName,
                 Email = p.User.Email,
+                UserId = p.User.Id,
                 LastName = p.User.Person.LastName,
             };
 

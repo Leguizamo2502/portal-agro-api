@@ -51,6 +51,30 @@ namespace Entity.Infrastructure.DataInit.Auth
                     PhoneNumber = "3000000003",
                     CreateAt = initialDate,
                     IsDeleted = false
+                },
+                new Person
+                {
+                    Id = 4,
+                    FirstName = "Sergio",
+                    LastName = "Leguizamo",
+                    Identification = "000000003",
+                    CityId = 33,
+                    Address = "Avenida 3 # 5-30",
+                    PhoneNumber = "3000000004",
+                    CreateAt = initialDate,
+                    IsDeleted = false
+                },
+                new Person
+                {
+                    Id = 5,
+                    FirstName = "Ruben",
+                    LastName = "Leguizamo",
+                    Identification = "000000004",
+                    CityId = 33,
+                    Address = "Avenida 3 # 5-30",
+                    PhoneNumber = "3000000005",
+                    CreateAt = initialDate,
+                    IsDeleted = false
                 }
             );
         }
