@@ -71,7 +71,7 @@ app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
 
 // Migraciones en arranque
-MigrationManager.MigrateAllDatabases(app.Services, builder.Configuration);
+//MigrationManager.MigrateAllDatabases(app.Services, builder.Configuration);
 
 
 app.Run();
