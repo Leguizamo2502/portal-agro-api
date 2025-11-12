@@ -1,4 +1,4 @@
-﻿using Business.CustomJwt;
+using Business.CustomJwt;
 using Business.Interfaces.Implements.Auth;
 using Business.Interfaces.Implements.Security.Mes;
 using Entity.Domain.Models.Implements.Auth.Token;
@@ -6,6 +6,7 @@ using Entity.DTOs.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Utilities.Exceptions;
 using Utilities.Helpers.Auth;
 using Web.Infrastructures;
@@ -100,6 +101,84 @@ namespace Web.Controllers.Implements.Auth
             }
         }
 
+        [HttpPost("LoginWithoutCookies")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> LoginWithoutCookies([FromBody] LoginUserDto dto, CancellationToken ct)
+        {
+            try
+            {
+                var (access, refresh, csrf) = await _token.GenerateTokensAsync(dto);
+                var now = DateTime.UtcNow;
+
+                var response = new LoginTokensResponseDto
+                {
+                    IsSuccess = true,
+                    AccessToken = access,
+                    RefreshToken = refresh,
+                    CsrfToken = csrf,
+                    AccessTokenExpiresAt = now.AddMinutes(_jwt.AccessTokenExpirationMinutes),
+                    RefreshTokenExpiresAt = now.AddDays(_jwt.RefreshTokenExpirationDays)
+                };
+
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new { isSuccess = false, message = "Credenciales inválidas" });
+            }
+        }
+
+        [HttpPost("RefreshWithoutCookies")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> RefreshWithoutCookies([FromBody] RefreshTokensRequestDto dto, CancellationToken ct)
+        {
+            if (dto is null || string.IsNullOrWhiteSpace(dto.RefreshToken))
+            {
+                return BadRequest(new { isSuccess = false, message = "Refresh token requerido" });
+            }
+
+            try
+            {
+                var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+                var (newAccess, newRefresh) = await _token.RefreshAsync(dto.RefreshToken, remoteIp);
+
+                var now = DateTime.UtcNow;
+                return Ok(new LoginTokensResponseDto
+                {
+                    IsSuccess = true,
+                    AccessToken = newAccess,
+                    RefreshToken = newRefresh,
+                    CsrfToken = string.Empty,
+                    AccessTokenExpiresAt = now.AddMinutes(_jwt.AccessTokenExpirationMinutes),
+                    RefreshTokenExpiresAt = now.AddDays(_jwt.RefreshTokenExpirationDays)
+                });
+            }
+            catch (SecurityTokenException ex)
+            {
+                return Unauthorized(new { isSuccess = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("LogoutWithoutCookies")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> LogoutWithoutCookies([FromBody] LogoutRequestDto dto, CancellationToken ct)
+        {
+            if (dto is null || string.IsNullOrWhiteSpace(dto.RefreshToken))
+            {
+                return BadRequest(new { isSuccess = false, message = "Refresh token requerido" });
+            }
+
+            await _token.RevokeRefreshTokenAsync(dto.RefreshToken);
+
+            return Ok(new { isSuccess = true, message = "Sesión cerrada" });
+        }
 
 
         /// <summary>Renueva tokens (usa refresh cookie + comprobación CSRF double-submit).</summary>
