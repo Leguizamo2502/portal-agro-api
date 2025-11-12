@@ -160,9 +160,9 @@ namespace Business.Services.BackgroundServices.Implements
                         {
                             UserId = order.UserId,
                             Title = "Pedido expirado",
-                            Message = $"Tu pedido {order.Code} expiró por no cargar el comprobante de pago a tiempo.",
+                            Message = $"Tu pedido {order.Id} expiró por no cargar el comprobante de pago a tiempo.",
                             RelatedType = "Order",
-                            RelatedRoute = $"/orders/{order.Id}"
+                            RelatedRoute = $"/account/orders/{order.Code}"
                         }, ct);
 
                         // Productor (útil para liberar seguimiento)
@@ -172,9 +172,9 @@ namespace Business.Services.BackgroundServices.Implements
                         {
                             UserId = producerNtc.UserId,
                             Title = "Pedido expirado del cliente",
-                            Message = $"El pedido {order.Code} expiró por falta de comprobante de pago del cliente.",
+                            Message = $"El pedido {order.Id} expiró por falta de comprobante de pago del cliente.",
                             RelatedType = "Order",
-                            RelatedRoute = $"/producer/orders/{order.Id}"
+                            RelatedRoute = $"/account/producer/orders/{order.Code}"
                         }, ct);
                     }
                     catch (Exception exNotif)

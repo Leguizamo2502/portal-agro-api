@@ -143,9 +143,9 @@ namespace Business.Services.BackgroundServices.Implements
                         {
                             UserId = producerNtc.UserId,
                             Title = "Pedido completado automáticamente",
-                            Message = $"El pedido {order.Code} se completó por tiempo expirado sin confirmación del cliente.",
+                            Message = $"El pedido {order.Id} se completó por tiempo expirado sin confirmación del cliente.",
                             RelatedType = "Order",
-                            RelatedRoute = $"/producer/orders/{order.Id}"
+                            RelatedRoute = $"/account/producer/orders/{order.Code}"
                         }, ct);
 
                         // Cliente
@@ -153,9 +153,9 @@ namespace Business.Services.BackgroundServices.Implements
                         {
                             UserId = order.UserId,
                             Title = "Pedido completado automáticamente",
-                            Message = $"Tu pedido {order.Code} se marcó como completado automáticamente.",
+                            Message = $"Tu pedido {order.Id} se marcó como completado automáticamente.",
                             RelatedType = "Order",
-                            RelatedRoute = $"/orders/{order.Id}"
+                            RelatedRoute = $"/account/orders/{order.Code}"
                         }, ct);
                     }
                     catch (Exception exNotif)
