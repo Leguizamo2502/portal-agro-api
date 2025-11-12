@@ -97,18 +97,18 @@ namespace Business.Services.Orders
             {
                 UserId = producerUserId, // FIX
                 Title = "Nuevo pedido recibido",
-                Message = $"Tienes un nuevo pedido {order.Code} por {order.QuantityRequested} unidad(es) de {order.ProductNameSnapshot}.",
+                Message = $"Tienes un nuevo pedido {order.Id} por {order.QuantityRequested} unidad(es) de {order.ProductNameSnapshot}.",
                 RelatedType = "Order",
-                RelatedRoute = $"/producer/orders/{order.Id}"
+                RelatedRoute = $"/account/producer/orders/{order.Code}"
             });
 
             await _notifications.CreateAsync(new CreateNotificationRequest
             {
                 UserId = order.UserId,
                 Title = "Pedido creado",
-                Message = $"Tu pedido {order.Code} fue registrado y está pendiente de revisión del productor.",
+                Message = $"Tu pedido {order.Id} fue registrado y está pendiente de revisión del productor.",
                 RelatedType = "Order",
-                RelatedRoute = $"/orders/{order.Id}"
+                RelatedRoute = $"/account/orders/{order.Code}"
             });
 
             return order.Id;
@@ -183,9 +183,9 @@ namespace Business.Services.Orders
             {
                 UserId = order.UserId,
                 Title = "Pedido aceptado",
-                Message = $"Tu pedido {order.Code} fue aceptado. Sube tu comprobante antes de la fecha límite.",
+                Message = $"Tu pedido {order.Id} fue aceptado. Sube tu comprobante antes de la fecha límite.",
                 RelatedType = "Order",
-                RelatedRoute = $"/orders/{order.Id}"
+                RelatedRoute = $"/account/producer/orders/{order.Code}"
             });
         }
 
@@ -282,9 +282,9 @@ namespace Business.Services.Orders
                 {
                     UserId = producerUserId, // FIX
                     Title = "Pago enviado por el cliente",
-                    Message = $"El pedido {order.Code} tiene comprobante cargado. Revisa y continúa el proceso.",
+                    Message = $"El pedido {order.Id} tiene comprobante cargado. Revisa y continúa el proceso.",
                     RelatedType = "Order",
-                    RelatedRoute = $"/producer/orders/{order.Id}"
+                    RelatedRoute = $"/account/producer/orders/{order.Code}"
                 });
             }
             catch (Exception ex)
@@ -338,7 +338,7 @@ namespace Business.Services.Orders
                         Title = "Tu pedido está en preparación",
                         Message = $"El pedido {order.Code} pasó a estado 'Preparando'.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/orders/{order.Id}"
+                        RelatedRoute = $"/account/orders/{order.Code}"
                     });
                 }
                 catch (Exception exMail)
@@ -395,9 +395,9 @@ namespace Business.Services.Orders
                     {
                         UserId = order.UserId,
                         Title = "Tu pedido fue despachado",
-                        Message = $"El pedido {order.Code} fue despachado. Pronto lo recibirás.",
+                        Message = $"El pedido {order.Id} fue despachado. Pronto lo recibirás.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/orders/{order.Id}"
+                        RelatedRoute = $"/account/orders/{order.Code}"
                     });
                 }
                 catch (Exception exMail)
@@ -458,9 +458,9 @@ namespace Business.Services.Orders
                     {
                         UserId = order.UserId,
                         Title = "Pedido entregado: confirma recepción",
-                        Message = $"Marca si recibiste el pedido {order.Code}.",
+                        Message = $"Marca si recibiste el pedido {order.Id}.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/orders/{order.Id}"
+                        RelatedRoute = $"/account/orders/{order.Code}"
                     });
                 }
                 catch (Exception exMail)
@@ -513,7 +513,7 @@ namespace Business.Services.Orders
                         Title = "Pedido cancelado por el cliente",
                         Message = $"El pedido {order.Code} fue cancelado por el cliente.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/producer/orders/{order.Id}"
+                        RelatedRoute = $"/account/producer/orders/{order.Code}"
                     });
                 }
                 catch (Exception exMail)
@@ -571,9 +571,9 @@ namespace Business.Services.Orders
                 {
                     UserId = order.UserId,
                     Title = "Pedido rechazado",
-                    Message = $"Tu pedido {order.Code} fue rechazado por el productor. Motivo: {order.ProducerDecisionReason}.",
+                    Message = $"Tu pedido {order.Id} fue rechazado por el productor. Motivo: {order.ProducerDecisionReason}.",
                     RelatedType = "Order",
-                    RelatedRoute = $"/orders/{order.Id}"
+                    RelatedRoute = $"/account/orders/{order.Code}"
                 });
             }
             catch (DbUpdateConcurrencyException)
@@ -659,18 +659,18 @@ namespace Business.Services.Orders
                     {
                         UserId = producerUserId, // FIX
                         Title = "Pedido completado",
-                        Message = $"El cliente confirmó la recepción del pedido {order.Code}.",
+                        Message = $"El cliente confirmó la recepción del pedido {order.Id}.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/producer/orders/{order.Id}"
+                        RelatedRoute = $"/account/producer/orders/{order.Code}"
                     });
 
                     await _notifications.CreateAsync(new CreateNotificationRequest
                     {
                         UserId = order.UserId,
                         Title = "¡Gracias! Pedido completado",
-                        Message = $"Confirmaste la recepción del pedido {order.Code}.",
+                        Message = $"Confirmaste la recepción del pedido.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/orders/{order.Id}"
+                        RelatedRoute = $"/account/orders/{order.Code}"
                     });
                 }
                 else if (order.Status == OrderStatus.Disputed)
@@ -693,9 +693,9 @@ namespace Business.Services.Orders
                     {
                         UserId = producerUserId, // FIX
                         Title = "Pedido en disputa",
-                        Message = $"El cliente marcó el pedido {order.Code} como 'No recibido'.",
+                        Message = $"El cliente marcó el pedido {order.Id} como 'No recibido'.",
                         RelatedType = "Order",
-                        RelatedRoute = $"/producer/orders/{order.Id}"
+                        RelatedRoute = $"/account/producer/orders/{order.Code}"
                     });
                 }
             }
