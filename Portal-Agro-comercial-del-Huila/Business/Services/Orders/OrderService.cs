@@ -185,7 +185,7 @@ namespace Business.Services.Orders
                 Title = "Pedido aceptado",
                 Message = $"Tu pedido {order.Id} fue aceptado. Sube tu comprobante antes de la fecha límite.",
                 RelatedType = "Order",
-                RelatedRoute = $"/account/producer/orders/{order.Code}"
+                RelatedRoute = $"/account/orders/{order.Code}"
             });
         }
 
